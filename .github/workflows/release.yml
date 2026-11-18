@@ -1,0 +1,69 @@
+name: Publish MGU Store Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v0.1.0)'
+        required: true
+        default: 'v0.1.0'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with nested app submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Determine release tag
+        id: meta
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "base_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Build MGU Store packages & Schema 2 catalog
+        run: |
+          node release/build_catalog.js --base-url "${{ steps.meta.outputs.base_url }}"
+
+      - name: Upload versioned GitHub Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.tgz dist/*.png dist/mgu-store.json --clobber
+          else
+            gh release create "$TAG" dist/*.tgz dist/*.png dist/mgu-store.json \
+              --title "$TAG" \
+              --generate-notes
+          fi
+
+      - name: Update rolling `catalog` release for MGU Store
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view catalog >/dev/null 2>&1; then
+            gh release upload catalog dist/catalog.json dist/*.png --clobber
+          else
+            gh release create catalog dist/catalog.json dist/*.png \
+              --title "MGU Store Catalog" \
+              --notes "Automated MGU Store Schema 2 catalog index."
+          fi
