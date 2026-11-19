@@ -91,3 +91,16 @@ jobs:
               --title "MGU Store Catalog (Develop)" \
               --notes "Rolling develop test channel for MGU Store (subscribe via HTTPS catalog URL)."
           fi
+
+      - name: Mirror `catalog.json` + icons to `catalog-develop` branch (raw.githubusercontent.com HMI source)
+        if: steps.meta.outputs.mode == 'develop'
+        run: |
+          TMP_DIR=$(mktemp -d)
+          cp dist/catalog.json dist/*.png "$TMP_DIR/"
+          cd "$TMP_DIR"
+          git init -b catalog-develop
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: publish develop catalog (${GITHUB_SHA::7})"
+          git push --force "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" catalog-develop:refs/heads/catalog-develop
