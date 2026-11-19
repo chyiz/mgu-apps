@@ -2,6 +2,8 @@ name: Publish MGU Store Release
 
 on:
   push:
+    branches:
+      - develop
     tags:
       - 'v*.*.*'
   workflow_dispatch:
@@ -28,22 +30,29 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Determine release tag
+      - name: Determine release channel & tag
         id: meta
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ inputs.tag }}"
+            echo "mode=stable" >> "$GITHUB_OUTPUT"
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+            echo "base_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            echo "mode=develop" >> "$GITHUB_OUTPUT"
+            echo "tag=catalog-develop" >> "$GITHUB_OUTPUT"
+            echo "base_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/catalog-develop" >> "$GITHUB_OUTPUT"
           else
-            TAG="${GITHUB_REF_NAME}"
+            echo "mode=stable" >> "$GITHUB_OUTPUT"
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "base_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           fi
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-          echo "base_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Build MGU Store packages & Schema 2 catalog
         run: |
           node release/build_catalog.js --base-url "${{ steps.meta.outputs.base_url }}"
 
-      - name: Upload versioned GitHub Release assets
+      - name: Upload versioned GitHub Release assets (stable)
+        if: steps.meta.outputs.mode == 'stable'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -56,7 +65,8 @@ jobs:
               --generate-notes
           fi
 
-      - name: Update rolling `catalog` release for MGU Store
+      - name: Update rolling `catalog` release for MGU Store (stable)
+        if: steps.meta.outputs.mode == 'stable'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -66,4 +76,18 @@ jobs:
             gh release create catalog dist/catalog.json dist/*.png \
               --title "MGU Store Catalog" \
               --notes "Automated MGU Store Schema 2 catalog index."
+          fi
+
+      - name: Update rolling `catalog-develop` prerelease for MGU Store (develop)
+        if: steps.meta.outputs.mode == 'develop'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view catalog-develop >/dev/null 2>&1; then
+            gh release upload catalog-develop dist/catalog.json dist/*.tgz dist/*.png dist/mgu-store.json --clobber
+          else
+            gh release create catalog-develop dist/catalog.json dist/*.tgz dist/*.png dist/mgu-store.json \
+              --prerelease \
+              --title "MGU Store Catalog (Develop)" \
+              --notes "Rolling develop test channel for MGU Store (subscribe via HTTPS catalog URL)."
           fi
