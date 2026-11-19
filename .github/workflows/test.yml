@@ -1,0 +1,31 @@
+name: Validate & Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with nested app submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js & Python
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run idrive7-cluster-metrics test suite
+        working-directory: idrive7-cluster-metrics
+        run: |
+          npm ci --no-audit --no-fund
+          python3 vendor/cauliflowermossgrape-idrive7-apps/kit/tools/build.py --stub-sdk cluster_metrics
+          node test/run_tests.js
+          rm -rf dist oap-sdk
+
+      - name: Build & verify MGU Store catalog (no bundled oap-sdk)
+        run: node release/build_catalog.js

@@ -1,0 +1,6 @@
+# Release & catalog build outputs
+dist/
+*.tgz
+*.mgu
+*.log
+.DS_Store

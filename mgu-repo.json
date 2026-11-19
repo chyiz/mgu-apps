@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "components": [
+    {
+      "id": "cluster_metrics",
+      "kind": "app",
+      "path": "idrive7-cluster-metrics/apps/cluster_metrics",
+      "manifest": "app.json",
+      "icon": "icon.png",
+      "mguHmi": ["ID7"],
+      "requires": {
+        "cluster-render": "0.4.0"
+      },
+      "uninstallable": true,
+      "build": {
+        "python": "idrive7-cluster-metrics/vendor/cauliflowermossgrape-idrive7-apps/kit/tools/build.py",
+        "args": ["{id}"],
+        "sdk": "idrive7-cluster-metrics/oap-sdk",
+        "output": "idrive7-cluster-metrics/dist/{id}@{version}.tgz"
+      }
+    }
+  ]
+}
