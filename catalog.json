@@ -1,0 +1,29 @@
+{
+  "schema": 2,
+  "commit": "e218b17a7804ab8cee261c86adb16d31f8def981",
+  "components": [
+    {
+      "id": "cluster_metrics",
+      "kind": "app",
+      "title": "Cluster Metrics",
+      "description": "Real-time efficiency, HV battery %, powertrain temperatures, gear in D, full-wing Right-Wing Media/Charging/Trip widget, HUD turn-by-turn nav, and live DSC hydraulic brake indicator for BMW iDrive 7",
+      "author": "chyiz",
+      "version": "0.8.7",
+      "artifact": {
+        "name": "cluster_metrics@0.8.7.tgz",
+        "size": 2385377,
+        "sha256": "35db698036dcece0dc05a724464fb712f9688ab5ac1fec16f1d445be8e8d7d75",
+        "url": "https://github.com/chyiz/mgu-apps/releases/download/catalog-develop/cluster_metrics@0.8.7.tgz"
+      },
+      "uninstallable": true,
+      "mguHmi": [
+        "ID7"
+      ],
+      "requires": {
+        "cluster-render": "0.4.0"
+      },
+      "icon": "cluster_metrics.png",
+      "iconSha256": "518204a130ebce094cb9109e12288d35bde2c7cdcc1973f4b9a37700f3a5ea0f"
+    }
+  ]
+}
