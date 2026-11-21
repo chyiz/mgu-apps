@@ -18,6 +18,21 @@
         "sdk": "idrive7-cluster-metrics/oap-sdk",
         "output": "idrive7-cluster-metrics/dist/{id}@{version}.tgz"
       }
+    },
+    {
+      "id": "hybrid_capture",
+      "kind": "app",
+      "path": "idrive7-hybrid-capture/apps/hybrid_capture",
+      "manifest": "app.json",
+      "icon": "icon.png",
+      "mguHmi": ["ID7"],
+      "uninstallable": true,
+      "build": {
+        "python": "idrive7-hybrid-capture/vendor/cauliflowermossgrape-idrive7-apps/kit/tools/build.py",
+        "args": ["{id}"],
+        "sdk": "idrive7-hybrid-capture/oap-sdk",
+        "output": "idrive7-hybrid-capture/dist/{id}@{version}.tgz"
+      }
     }
   ]
 }

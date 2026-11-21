@@ -27,5 +27,12 @@ jobs:
           node test/run_tests.js
           rm -rf dist oap-sdk
 
+      - name: Run idrive7-hybrid-capture test suite
+        working-directory: idrive7-hybrid-capture
+        run: |
+          python3 vendor/cauliflowermossgrape-idrive7-apps/kit/tools/build.py --stub-sdk hybrid_capture
+          node test/run_tests.js
+          rm -rf dist oap-sdk
+
       - name: Build & verify MGU Store catalog (no bundled oap-sdk)
         run: node release/build_catalog.js

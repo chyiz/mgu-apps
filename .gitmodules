@@ -1,3 +1,6 @@
 [submodule "idrive7-cluster-metrics"]
 	path = idrive7-cluster-metrics
 	url = https://github.com/chyiz/idrive7-cluster-metrics.git
+[submodule "idrive7-hybrid-capture"]
+	path = idrive7-hybrid-capture
+	url = https://github.com/chyiz/idrive7-hybrid-capture.git
