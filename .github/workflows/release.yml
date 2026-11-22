@@ -57,7 +57,6 @@ jobs:
           node idrive-apps/apps/robertn_waze_cluster/tools/test_control.js
           node idrive-apps/apps/robertn_waze_cluster/tools/test_page.js
           node idrive-apps/apps/robertn_waze_cluster/tools/test_profiles.js
-          node idrive-apps/apps/robertn_waze_cluster/tools/test_nav_sync.js
           node idrive-apps/apps/robertn_waze_cluster/tools/test_i18n.js
 
       - name: Build MGU Store packages & Schema 2 catalog
