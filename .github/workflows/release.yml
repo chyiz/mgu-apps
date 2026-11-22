@@ -51,6 +51,7 @@ jobs:
         if: hashFiles('idrive-apps/release/release.js') != ''
         run: |
           git -C idrive-apps fetch --unshallow --tags 2>/dev/null || git -C idrive-apps fetch --tags
+          node idrive-apps/release/release.js versions waze-on-cluster@0.13.0
           make -C idrive-apps/native/waze-on-cluster test
           make -C idrive-apps/native/waze-on-cluster test-x86
           node idrive-apps/apps/robertn_waze_cluster/tools/test_control.js

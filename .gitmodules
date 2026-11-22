@@ -7,3 +7,4 @@
 [submodule "idrive-apps"]
 	path = idrive-apps
 	url = https://github.com/chyiz/idrive-apps.git
+	branch = operation-mode

@@ -13,6 +13,7 @@
  */
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
 const { execFileSync } = require('child_process');
@@ -202,15 +203,34 @@ function main() {
     const idriveDir = path.join(ROOT, 'idrive-apps');
     const idriveReleaseScript = path.join(idriveDir, 'release', 'release.js');
     if (fs.existsSync(idriveReleaseScript)) {
-        const idriveOut = path.join(idriveDir, 'release', 'out');
-        fs.rmSync(idriveOut, { recursive: true, force: true });
+        /* idrive-apps keeps upstream PR-ready versions (unchanged from base,
+         * CHANGELOG under ## Unreleased, and "requires": "next"). Clone into a
+         * temporary repo and run upstream's own `release.js stamp` there so the
+         * submodule stays clean while catalog-develop gets stamped semver
+         * versions and resolved requires. */
+        const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mgu-idrive-stamp-'));
+        const tmpRepo = path.join(tmpRoot, 'repo');
         try {
-            execFileSync(process.execPath, ['release/release.js', 'build', 'waze-on-cluster', 'robertn_waze_cluster'], {
-                cwd: idriveDir,
+            execFileSync('git', ['clone', '--no-hardlinks', idriveDir, tmpRepo], { stdio: 'inherit' });
+            execFileSync('git', ['-C', tmpRepo, 'fetch', '--tags', idriveDir], { stdio: 'inherit' });
+            execFileSync('git', ['-C', tmpRepo, 'config', 'user.name', 'github-actions[bot]'], { stdio: 'ignore' });
+            execFileSync('git', ['-C', tmpRepo, 'config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'], { stdio: 'ignore' });
+            execFileSync(process.execPath, ['release/release.js', 'stamp', 'waze-on-cluster', 'robertn_waze_cluster'], {
+                cwd: tmpRepo,
+                env: Object.assign({}, process.env, { MGU_RELEASE_LABELS: 'off' }),
                 stdio: 'inherit',
             });
+            execFileSync(process.execPath, ['release/release.js', 'build', 'waze-on-cluster', 'robertn_waze_cluster'], {
+                cwd: tmpRepo,
+                stdio: 'inherit',
+            });
+            const idriveOut = path.join(tmpRepo, 'release', 'out');
             const idriveCatalog = JSON.parse(fs.readFileSync(path.join(idriveOut, 'catalog.json'), 'utf8'));
             for (const entry of idriveCatalog.components || []) {
+                const unresolved = Object.keys(entry.requires || {}).filter((k) => entry.requires[k] === 'next');
+                if (unresolved.length > 0) {
+                    throw new Error(`${entry.id}@${entry.version} still has unresolved "next" requires: ${unresolved.join(', ')}`);
+                }
                 const artifactName = entry.artifact.name;
                 const srcTgz = path.join(idriveOut, artifactName);
                 const destTgz = path.join(opts.outDir, artifactName);
@@ -247,7 +267,7 @@ function main() {
                 }
             }
         } finally {
-            fs.rmSync(idriveOut, { recursive: true, force: true });
+            fs.rmSync(tmpRoot, { recursive: true, force: true });
         }
     }
 

@@ -34,5 +34,11 @@ jobs:
           node test/run_tests.js
           rm -rf dist oap-sdk
 
+      - name: Fetch idrive-apps tags & verify upstream PR version rules
+        if: hashFiles('idrive-apps/release/release.js') != ''
+        run: |
+          git -C idrive-apps fetch --unshallow --tags 2>/dev/null || git -C idrive-apps fetch --tags
+          node idrive-apps/release/release.js versions waze-on-cluster@0.13.0
+
       - name: Build & verify MGU Store catalog (no bundled oap-sdk)
         run: node release/build_catalog.js
