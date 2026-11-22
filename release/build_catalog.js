@@ -199,6 +199,58 @@ function main() {
         }
     }
 
+    const idriveDir = path.join(ROOT, 'idrive-apps');
+    const idriveReleaseScript = path.join(idriveDir, 'release', 'release.js');
+    if (fs.existsSync(idriveReleaseScript)) {
+        const idriveOut = path.join(idriveDir, 'release', 'out');
+        fs.rmSync(idriveOut, { recursive: true, force: true });
+        try {
+            execFileSync(process.execPath, ['release/release.js', 'build', 'waze-on-cluster', 'robertn_waze_cluster'], {
+                cwd: idriveDir,
+                stdio: 'inherit',
+            });
+            const idriveCatalog = JSON.parse(fs.readFileSync(path.join(idriveOut, 'catalog.json'), 'utf8'));
+            for (const entry of idriveCatalog.components || []) {
+                const artifactName = entry.artifact.name;
+                const srcTgz = path.join(idriveOut, artifactName);
+                const destTgz = path.join(opts.outDir, artifactName);
+                fs.copyFileSync(srcTgz, destTgz);
+
+                if (entry.icon) {
+                    const srcIcon = path.join(idriveOut, entry.icon);
+                    if (fs.existsSync(srcIcon)) {
+                        fs.copyFileSync(srcIcon, path.join(opts.outDir, entry.icon));
+                    }
+                }
+
+                const merged = Object.assign({}, entry, {
+                    author: opts.author,
+                    artifact: Object.assign({}, entry.artifact, {
+                        url: opts.baseUrl ? `${opts.baseUrl}/${artifactName}` : artifactName,
+                    }),
+                });
+                catalogComponents.push(merged);
+
+                if (merged.kind === 'app') {
+                    storeApps[merged.id] = {
+                        title: merged.title,
+                        description: merged.description,
+                        author: opts.author,
+                    };
+                    if (merged.icon) {
+                        storeApps[merged.id].icon = merged.icon;
+                        storeApps[merged.id].iconSha256 = merged.iconSha256;
+                    }
+                    if (merged.texts) {
+                        storeApps[merged.id].texts = merged.texts;
+                    }
+                }
+            }
+        } finally {
+            fs.rmSync(idriveOut, { recursive: true, force: true });
+        }
+    }
+
     const catalog = {
         schema: 2,
         ...(headCommit ? { commit: headCommit } : {}),

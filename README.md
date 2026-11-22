@@ -8,6 +8,7 @@
 |---|---|---|---|
 | [**Cluster Metrics**](https://github.com/chyiz/idrive7-cluster-metrics) | `cluster_metrics` | `ID7` (`cluster-render >= 0.4.0`) | A **Stock+** instrument cluster & windshield HUD overlay that keeps BMW's native gauges while adding real-time efficiency, power/charging speed, active gear (`1–8`), friction-brake gauge, Oil/Coolant temps, HV battery `%`, right-wing Media/Trip/Charging widgets, and HUD navigation. *(Work in progress)* |
 | [**Hybrid Capture**](https://github.com/chyiz/idrive7-hybrid-capture) | `hybrid_capture` | `ID7` (standalone) | PHEV Anticipatory Hybrid Drive (VEM), ICE cut-in reason, sailing/coasting, NavGraph2/eDriveZone telemetry recorder & safety-gated SOME/IP write probe tool. *(Develop channel)* |
+| [**Maps on cluster**](https://github.com/chyiz/idrive-apps) | `robertn_waze_cluster` + `waze-on-cluster` | `ID7` (`cluster-render >= 0.5.3`) | Fork of `waze-on-cluster` adding configurable **Operation mode** (`Always CarPlay`, `Only when CarPlay in Navigation`, and `Yield for BMW Map`) with live SOME/IP route guidance switching. *(Develop channel)* |
 
 ---
 

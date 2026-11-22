@@ -4,3 +4,6 @@
 [submodule "idrive7-hybrid-capture"]
 	path = idrive7-hybrid-capture
 	url = https://github.com/chyiz/idrive7-hybrid-capture.git
+[submodule "idrive-apps"]
+	path = idrive-apps
+	url = https://github.com/chyiz/idrive-apps.git

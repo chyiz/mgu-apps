@@ -47,6 +47,18 @@ jobs:
             echo "base_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Fetch idrive-apps history & run waze-on-cluster CI checks
+        if: hashFiles('idrive-apps/release/release.js') != ''
+        run: |
+          git -C idrive-apps fetch --unshallow --tags 2>/dev/null || git -C idrive-apps fetch --tags
+          make -C idrive-apps/native/waze-on-cluster test
+          make -C idrive-apps/native/waze-on-cluster test-x86
+          node idrive-apps/apps/robertn_waze_cluster/tools/test_control.js
+          node idrive-apps/apps/robertn_waze_cluster/tools/test_page.js
+          node idrive-apps/apps/robertn_waze_cluster/tools/test_profiles.js
+          node idrive-apps/apps/robertn_waze_cluster/tools/test_nav_sync.js
+          node idrive-apps/apps/robertn_waze_cluster/tools/test_i18n.js
+
       - name: Build MGU Store packages & Schema 2 catalog
         run: |
           node release/build_catalog.js --base-url "${{ steps.meta.outputs.base_url }}"
