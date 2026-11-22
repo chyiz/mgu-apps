@@ -37,15 +37,47 @@ function parseArgs(argv) {
     return opts;
 }
 
-function verifyNoBundledSdk(tgzPath) {
+function verifyPackage(tgzPath, expectedId, expectedVersion) {
+    const stat = fs.statSync(tgzPath);
+    if (stat.size > 32 * 1024 * 1024) {
+        throw new Error(`${path.basename(tgzPath)} exceeds MGU Store 32 MiB limit (${stat.size} bytes)`);
+    }
     const listing = execFileSync('tar', ['-tzf', tgzPath], { encoding: 'utf8' });
     const lines = listing.split(/\r?\n/).filter(Boolean);
     const sdkFiles = lines.filter((l) => l.includes('node_modules/oap-sdk'));
     if (sdkFiles.length > 0) {
         throw new Error(`${path.basename(tgzPath)} contains non-redistributable oap-sdk files: ${sdkFiles.join(', ')}`);
     }
-    if (!lines.includes('package/package.json') && !lines.includes('package.json')) {
+    const pkgEntry = lines.includes('package/package.json')
+        ? 'package/package.json'
+        : (lines.includes('package.json') ? 'package.json' : null);
+    if (!pkgEntry) {
         throw new Error(`${path.basename(tgzPath)} is missing package.json`);
+    }
+    const pkgRaw = execFileSync('tar', ['-xOzf', tgzPath, pkgEntry], { encoding: 'utf8' });
+    const pkg = JSON.parse(pkgRaw);
+    if (pkg.name !== expectedId) {
+        throw new Error(`${path.basename(tgzPath)} package.json name=${JSON.stringify(pkg.name)} !== ${expectedId}`);
+    }
+    if (pkg.version !== expectedVersion) {
+        throw new Error(`${path.basename(tgzPath)} package.json version=${JSON.stringify(pkg.version)} !== ${expectedVersion}`);
+    }
+    if (!pkg.main || typeof pkg.main !== 'string') {
+        throw new Error(`${path.basename(tgzPath)} package.json is missing required "main" field (AppPackageJsonVerifier would reject install)`);
+    }
+    const prefix = pkgEntry.startsWith('package/') ? 'package/' : '';
+    const mainEntry = prefix + pkg.main.replace(/^\.\//, '');
+    if (!lines.includes(mainEntry)) {
+        throw new Error(`${path.basename(tgzPath)} is missing main entry ${mainEntry}`);
+    }
+    if (pkg.private !== false) {
+        throw new Error(`${path.basename(tgzPath)} package.json must set "private": false`);
+    }
+    if (!pkg.author || !pkg.license) {
+        throw new Error(`${path.basename(tgzPath)} package.json must set "author" and "license"`);
+    }
+    if (!pkg.oapAppSettings || !pkg.oapAppSettings.someipManifest) {
+        throw new Error(`${path.basename(tgzPath)} package.json is missing oapAppSettings.someipManifest`);
     }
 }
 
@@ -98,7 +130,7 @@ function main() {
         if (!fs.existsSync(builtTgz)) {
             throw new Error(`${id}: expected build output at ${builtTgz}`);
         }
-        verifyNoBundledSdk(builtTgz);
+        verifyPackage(builtTgz, id, version);
 
         const artifactName = `${id}@${version}.tgz`;
         const destTgz = path.join(opts.outDir, artifactName);
