@@ -6,7 +6,7 @@
 
 | App | App ID | Target | Description |
 |---|---|---|---|
-| [**Cluster Metrics**](https://github.com/chyiz/idrive7-cluster-metrics) | `cluster_metrics` | `ID7` (`cluster-render >= 0.4.0`) | A **Stock+** instrument cluster & windshield HUD overlay that keeps BMW's native gauges while adding real-time efficiency, power/charging speed, active gear (`1–8`), friction-brake gauge, Oil/Coolant temps, HV battery `%`, right-wing Media/Trip/Charging widgets, and HUD navigation. *(Work in progress)* |
+| [**Cluster+**](https://github.com/chyiz/idrive7-cluster-plus) | `cluster_metrics` | `ID7` (`cluster-render >= 0.4.0`) | A **Stock+** instrument cluster & windshield HUD overlay that keeps BMW's native gauges while adding real-time efficiency, power/charging speed, active gear (`1–8`), friction-brake gauge, Oil/Coolant temps, HV battery `%`, right-wing Media/Trip/Charging widgets, and HUD navigation. *(Work in progress)* |
 
 ---
 
@@ -17,10 +17,10 @@
 1. Make sure **[MGU Store](https://github.com/robertnisipeanu/mgu-store)** is installed on your head unit and the car has internet access (Wi-Fi hotspot, phone tethering, or USB/LTE uplink).
 2. Open **MGU Store** on your iDrive screen and go to **Settings → Add source**.
 3. Enter `chyiz/mgu-apps` and choose **Releases** as the channel.
-4. Go to the **Store** tab (or tap **Settings → Check now**), select **Cluster Metrics**, and tap **Install**.
+4. Go to the **Store** tab (or tap **Settings → Check now**), select **Cluster+**, and tap **Install**.
 
 > [!NOTE]
-> **Cluster Metrics** requires **`cluster-render` (`>= 0.4.0`)**, which is available in MGU Store's built-in `robertnisipeanu/idrive-apps` source. Install `cluster-render` first if you don't already have it.
+> **Cluster+** requires **`cluster-render` (`>= 0.4.0`)**, which is available in MGU Store's built-in `robertnisipeanu/idrive-apps` source. Install `cluster-render` first if you don't already have it.
 
 ### Option B: Offline USB Stick
 
