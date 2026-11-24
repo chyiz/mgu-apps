@@ -4,11 +4,11 @@
 
 ## Included Apps
 
-| App | App ID | Target | Description |
-|---|---|---|---|
-| [**Cluster+**](https://github.com/chyiz/idrive7-cluster-plus) | `cluster_metrics` | `ID7` (`cluster-render >= 0.4.0`) | A **Stock+** instrument cluster & windshield HUD overlay that keeps BMW's native gauges while adding real-time efficiency, power/charging speed, active gear (`1–8`), friction-brake gauge, Oil/Coolant temps, HV battery `%`, right-wing Media/Trip/Charging widgets, and HUD navigation. *(Work in progress)* |
-| [**Hybrid Capture**](https://github.com/chyiz/idrive7-hybrid-capture) | `hybrid_capture` | `ID7` (standalone) | PHEV Anticipatory Hybrid Drive (VEM), ICE cut-in reason, sailing/coasting, NavGraph2/eDriveZone telemetry recorder & safety-gated SOME/IP write probe tool. *(Develop channel)* |
-| [**Maps on cluster**](https://github.com/chyiz/idrive-apps/tree/operation-mode) | `robertn_waze_cluster` + `waze-on-cluster` | `ID7` (`cluster-render >= 0.5.3`) | Fork of `waze-on-cluster` adding configurable **Show when** (`Always`, `Only when navigating on phone`, and `Yield to BMW navigation`) with live SOME/IP route guidance switching. *(Develop channel)* |
+| App | Target | Description |
+|---|---|---|
+| [**Cluster+**](https://github.com/chyiz/idrive7-cluster-plus) | `ID7` (`cluster-render >= 0.4.0`) | A **Stock+** instrument cluster & windshield HUD overlay that keeps BMW's native gauges while adding real-time efficiency, power/charging speed, active gear (`1–8`), hydraulic brake gauge, Oil/Coolant temps, HV battery `%`, right-wing Media/Trip/TPMS/Charging widgets, and HUD navigation. *(Work in progress)* |
+| [**Hybrid Capture**](https://github.com/chyiz/idrive7-hybrid-capture) | `ID7` (standalone) | PHEV Anticipatory Hybrid Drive (VEM), ICE cut-in reason, sailing/coasting, NavGraph2/eDriveZone telemetry recorder & safety-gated SOME/IP write probe tool. *(Develop channel)* |
+| [**Maps on cluster**](https://github.com/chyiz/idrive-apps/tree/operation-mode) | `ID7` (`cluster-render >= 0.5.3`) | Fork of `waze-on-cluster` adding configurable **Show when** (`Always`, `Only when navigating on phone`, and `Yield to BMW navigation`) with live route guidance switching. *(Develop channel)* |
 
 ---
 
