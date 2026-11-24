@@ -3,13 +3,13 @@ name: Publish MGU Store Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - '*@*.*.*'
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g. v0.1.0)'
+        description: 'Per-app release tag (e.g. cluster_metrics@0.9.3)'
         required: true
-        default: 'v0.1.0'
+        default: 'cluster_metrics@0.9.3'
 
 permissions:
   contents: write
@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Determine release tag
+      - name: Parse per-app release tag
         id: meta
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -36,22 +36,55 @@ jobs:
           else
             TAG="${GITHUB_REF_NAME}"
           fi
+          if ! printf '%s' "$TAG" | grep -Eq '^[a-z0-9][a-z0-9_-]*@[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Error: tag '$TAG' must match <app_id>@<x.y.z> (e.g. cluster_metrics@0.9.3)" >&2
+            exit 1
+          fi
+          APP_ID="${TAG%@*}"
+          APP_VERSION="${TAG#*@}"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "app_id=${APP_ID}" >> "$GITHUB_OUTPUT"
+          echo "app_version=${APP_VERSION}" >> "$GITHUB_OUTPUT"
           echo "base_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}" >> "$GITHUB_OUTPUT"
 
-      - name: Build MGU Store packages & Schema 2 catalog
+      - name: Fetch existing rolling catalog (if present)
+        id: existing_catalog
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          node release/build_catalog.js --base-url "${{ steps.meta.outputs.base_url }}"
+          if gh release download catalog -p catalog.json -O /tmp/existing-catalog.json 2>/dev/null; then
+            echo "path=/tmp/existing-catalog.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Upload versioned GitHub Release assets
+      - name: Build single-app MGU Store package & merge Schema 2 catalog
+        run: |
+          MERGE_ARGS=()
+          if [ -n "${{ steps.existing_catalog.outputs.path }}" ]; then
+            MERGE_ARGS+=(--merge-catalog "${{ steps.existing_catalog.outputs.path }}")
+          fi
+          node release/build_catalog.js \
+            --only "${{ steps.meta.outputs.app_id }}" \
+            --expected-version "${{ steps.meta.outputs.app_version }}" \
+            --base-url "${{ steps.meta.outputs.base_url }}" \
+            "${MERGE_ARGS[@]}"
+
+      - name: Upload per-app GitHub Release assets
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${{ steps.meta.outputs.tag }}"
+          APP_ID="${{ steps.meta.outputs.app_id }}"
+          APP_VERSION="${{ steps.meta.outputs.app_version }}"
+          ASSETS=("dist/${APP_ID}@${APP_VERSION}.tgz" "dist/mgu-store.json")
+          if [ -f "dist/${APP_ID}.png" ]; then
+            ASSETS+=("dist/${APP_ID}.png")
+          fi
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" dist/*.tgz dist/*.png dist/mgu-store.json --clobber
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
           else
-            gh release create "$TAG" dist/*.tgz dist/*.png dist/mgu-store.json \
+            gh release create "$TAG" "${ASSETS[@]}" \
               --title "$TAG" \
               --generate-notes
           fi
@@ -60,10 +93,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          APP_ID="${{ steps.meta.outputs.app_id }}"
+          CATALOG_ASSETS=("dist/catalog.json")
+          if [ -f "dist/${APP_ID}.png" ]; then
+            CATALOG_ASSETS+=("dist/${APP_ID}.png")
+          fi
           if gh release view catalog >/dev/null 2>&1; then
-            gh release upload catalog dist/catalog.json dist/*.png --clobber
+            gh release upload catalog "${CATALOG_ASSETS[@]}" --clobber
           else
-            gh release create catalog dist/catalog.json dist/*.png \
+            gh release create catalog "${CATALOG_ASSETS[@]}" \
               --title "MGU Store Catalog" \
               --notes "Automated MGU Store Schema 2 catalog index."
           fi

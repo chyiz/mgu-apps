@@ -26,7 +26,7 @@
 
 1. Download the release files from this repository's GitHub Releases:
    - `catalog.json` and `cluster_metrics.png` from the **`catalog`** release.
-   - `cluster_metrics@<version>.tgz` from the latest **`v*.*.*`** release.
+   - `cluster_metrics@<version>.tgz` from the latest **`cluster_metrics@*`** release.
 2. Place those files onto a FAT32/exFAT USB stick inside a folder named `mgu-repo/mgu-apps/`.
 3. Plug the USB stick into the car and install from **MGU Store → USB**.
 
@@ -51,7 +51,7 @@ git add idrive7-cluster-metrics
 git commit -m "Update idrive7-cluster-metrics"
 ```
 
-Pushing a `v*.*.*` tag triggers the **Publish MGU Store Release** GitHub Actions workflow, which checks out nested submodules recursively and publishes the versioned `.tgz` package plus the rolling `catalog` release.
+Pushing a per-app `<id>@<version>` tag (for example `cluster_metrics@0.9.3`) triggers the **Publish MGU Store Release** GitHub Actions workflow, which checks out nested submodules recursively, publishes that app's `.tgz` package under its own release tag, and merges only that app's entry into the rolling `catalog` release without disturbing other apps.
 
 </details>
 
