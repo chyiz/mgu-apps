@@ -4,9 +4,9 @@
 
 ## Included Apps
 
-| App | App ID | Target | Description |
-|---|---|---|---|
-| [**Cluster+**](https://github.com/chyiz/idrive7-cluster-plus) | `cluster_metrics` | `ID7` (`cluster-render >= 0.4.0`) | A **Stock+** instrument cluster & windshield HUD overlay that keeps BMW's native gauges while adding real-time efficiency, power/charging speed, active gear (`1–8`), friction-brake gauge, Oil/Coolant temps, HV battery `%`, right-wing Media/Trip/Charging widgets, and HUD navigation. *(Work in progress)* |
+| App | Target | Description |
+|---|---|---|
+| [**Cluster+**](https://github.com/chyiz/idrive7-cluster-plus) | `ID7` (`cluster-render >= 0.4.0`) | A **Stock+** instrument cluster & windshield HUD overlay that keeps BMW's native gauges while adding real-time efficiency, power/charging speed, active gear (`1–8`), hydraulic brake gauge, Oil/Coolant temps, HV battery `%`, right-wing Media/Trip/TPMS/Charging widgets, and HUD navigation. *(Work in progress)* |
 
 ---
 
